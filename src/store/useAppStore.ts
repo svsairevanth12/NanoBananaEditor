@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { Project, Generation, Edit, SegmentationMask, BrushStroke } from '../types';
+import { Project, Generation, Edit, SegmentationMask, BrushStroke, TextLayer } from '../types';
 
 interface AppState {
   // Current project
@@ -35,7 +35,11 @@ interface AppState {
   showPromptPanel: boolean;
   
   // UI state
-  selectedTool: 'generate' | 'edit' | 'mask';
+  selectedTool: 'generate' | 'edit' | 'mask' | 'text';
+
+  // Text layers state
+  textLayers: TextLayer[];
+  selectedTextId: string | null;
   
   // Actions
   setCurrentProject: (project: Project | null) => void;
@@ -68,8 +72,15 @@ interface AppState {
   setShowHistory: (show: boolean) => void;
   
   setShowPromptPanel: (show: boolean) => void;
-  
-  setSelectedTool: (tool: 'generate' | 'edit' | 'mask') => void;
+
+  setSelectedTool: (tool: 'generate' | 'edit' | 'mask' | 'text') => void;
+
+  // Text layer actions
+  addTextLayer: (layer: TextLayer) => void;
+  updateTextLayer: (id: string, updates: Partial<TextLayer>) => void;
+  deleteTextLayer: (id: string) => void;
+  selectTextLayer: (id: string | null) => void;
+  clearTextLayers: () => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -98,8 +109,11 @@ export const useAppStore = create<AppState>()(
       showHistory: true,
       
       showPromptPanel: true,
-      
+
       selectedTool: 'generate',
+
+      textLayers: [],
+      selectedTextId: null,
       
       // Actions
       setCurrentProject: (project) => set({ currentProject: project }),
@@ -156,8 +170,25 @@ export const useAppStore = create<AppState>()(
       setShowHistory: (show) => set({ showHistory: show }),
       
       setShowPromptPanel: (show) => set({ showPromptPanel: show }),
-      
+
       setSelectedTool: (tool) => set({ selectedTool: tool }),
+
+      // Text layer actions
+      addTextLayer: (layer) => set((state) => ({
+        textLayers: [...state.textLayers, layer],
+        selectedTextId: layer.id,
+      })),
+      updateTextLayer: (id, updates) => set((state) => ({
+        textLayers: state.textLayers.map((layer) =>
+          layer.id === id ? { ...layer, ...updates } : layer
+        ),
+      })),
+      deleteTextLayer: (id) => set((state) => ({
+        textLayers: state.textLayers.filter((layer) => layer.id !== id),
+        selectedTextId: state.selectedTextId === id ? null : state.selectedTextId,
+      })),
+      selectTextLayer: (id) => set({ selectedTextId: id }),
+      clearTextLayers: () => set({ textLayers: [], selectedTextId: null }),
     }),
     { name: 'nano-banana-store' }
   )

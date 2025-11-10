@@ -9,7 +9,10 @@ export const useKeyboardShortcuts = () => {
     setShowPromptPanel,
     showPromptPanel,
     currentPrompt,
-    isGenerating
+    isGenerating,
+    selectedTextId,
+    deleteTextLayer,
+    selectTextLayer,
   } = useAppStore();
 
   useEffect(() => {
@@ -40,6 +43,10 @@ export const useKeyboardShortcuts = () => {
           event.preventDefault();
           setSelectedTool('mask');
           break;
+        case 't':
+          event.preventDefault();
+          setSelectedTool('text');
+          break;
         case 'h':
           event.preventDefault();
           setShowHistory(!showHistory);
@@ -54,10 +61,25 @@ export const useKeyboardShortcuts = () => {
             console.log('Re-roll variants');
           }
           break;
+        case 'delete':
+        case 'backspace':
+          // Delete selected text layer
+          if (selectedTextId) {
+            event.preventDefault();
+            deleteTextLayer(selectedTextId);
+          }
+          break;
+        case 'escape':
+          // Deselect text layer
+          if (selectedTextId) {
+            event.preventDefault();
+            selectTextLayer(null);
+          }
+          break;
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [setSelectedTool, setShowHistory, showHistory, setShowPromptPanel, showPromptPanel, currentPrompt, isGenerating]);
+  }, [setSelectedTool, setShowHistory, showHistory, setShowPromptPanel, showPromptPanel, currentPrompt, isGenerating, selectedTextId, deleteTextLayer, selectTextLayer]);
 };
