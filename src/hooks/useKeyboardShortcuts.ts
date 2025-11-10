@@ -13,12 +13,26 @@ export const useKeyboardShortcuts = () => {
     selectedTextId,
     deleteTextLayer,
     selectTextLayer,
+    selectedTool,
+    undoText,
+    redoText,
   } = useAppStore();
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      // Handle undo/redo even when typing (for text tool)
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'z' && selectedTool === 'text') {
+        event.preventDefault();
+        if (event.shiftKey) {
+          redoText();
+        } else {
+          undoText();
+        }
+        return;
+      }
+
       // Ignore if user is typing in an input
-      if (event.target instanceof HTMLInputElement || 
+      if (event.target instanceof HTMLInputElement ||
           event.target instanceof HTMLTextAreaElement) {
         // Only handle Cmd/Ctrl + Enter for generation
         if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
@@ -81,5 +95,5 @@ export const useKeyboardShortcuts = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [setSelectedTool, setShowHistory, showHistory, setShowPromptPanel, showPromptPanel, currentPrompt, isGenerating, selectedTextId, deleteTextLayer, selectTextLayer]);
+  }, [setSelectedTool, setShowHistory, showHistory, setShowPromptPanel, showPromptPanel, currentPrompt, isGenerating, selectedTextId, deleteTextLayer, selectTextLayer, selectedTool, undoText, redoText]);
 };

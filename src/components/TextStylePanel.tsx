@@ -12,6 +12,8 @@ import {
   Underline,
   Trash2,
   Plus,
+  Undo,
+  Redo,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 
@@ -40,6 +42,10 @@ export const TextStylePanel: React.FC = () => {
     updateTextLayer,
     deleteTextLayer,
     selectTextLayer,
+    undoText,
+    redoText,
+    textHistoryIndex,
+    textHistory,
   } = useAppStore();
 
   const [showColorPicker, setShowColorPicker] = useState(false);
@@ -118,10 +124,37 @@ export const TextStylePanel: React.FC = () => {
     }
   };
 
+  const canUndo = textHistoryIndex > 0;
+  const canRedo = textHistoryIndex < textHistory.length - 1;
+
   return (
     <div className="w-80 h-full bg-gray-950 border-l border-gray-800 p-6 flex flex-col space-y-6 overflow-y-auto">
       <div>
-        <h3 className="text-sm font-medium text-gray-300 mb-3">Text Tool</h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-medium text-gray-300">Text Tool</h3>
+          <div className="flex items-center space-x-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={undoText}
+              disabled={!canUndo}
+              className="h-7 w-7"
+              title="Undo (Ctrl+Z)"
+            >
+              <Undo className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={redoText}
+              disabled={!canRedo}
+              className="h-7 w-7"
+              title="Redo (Ctrl+Shift+Z)"
+            >
+              <Redo className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
         <Button onClick={handleAddText} className="w-full">
           <Plus className="h-4 w-4 mr-2" />
           Add Text Layer
